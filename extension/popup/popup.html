@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verity</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <div class="popup-header">
+      <div class="logo">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+        <span>Verity</span>
+      </div>
+      <button class="settings-btn" id="settingsBtn" title="Settings">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M12 1v6m0 6v6m5.2-13.2-4.2 4.2m0 6 4.2 4.2M23 12h-6m-6 0H1m13.2 5.2-4.2-4.2m0-6-4.2-4.2"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="stats-section">
+      <h3>Current Page</h3>
+      <div class="stats-grid">
+        <div class="stat-card verified">
+          <div class="stat-icon">✓</div>
+          <div class="stat-value" id="verifiedCount">0</div>
+          <div class="stat-label">Verified</div>
+        </div>
+        <div class="stat-card questionable">
+          <div class="stat-icon">⚠</div>
+          <div class="stat-value" id="questionableCount">0</div>
+          <div class="stat-label">Questionable</div>
+        </div>
+        <div class="stat-card false">
+          <div class="stat-icon">✕</div>
+          <div class="stat-value" id="falseCount">0</div>
+          <div class="stat-label">False</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="domain-section">
+      <h3>Domain Trust Score</h3>
+      <div class="trust-score-display">
+        <div class="trust-score-circle" id="trustScoreCircle">
+          <span class="trust-score-value" id="trustScoreValue">--</span>
+          <span class="trust-score-max">/100</span>
+        </div>
+        <div class="trust-score-info">
+          <p id="domainName">--</p>
+          <p class="trust-score-desc" id="trustScoreDesc">Calculating...</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions-section">
+      <button class="action-btn primary" id="scanBtn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="m21 21-4.35-4.35"/>
+        </svg>
+        Scan Page
+      </button>
+      <button class="action-btn secondary" id="reportBtn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+        </svg>
+        View Report
+      </button>
+    </div>
+
+    <div class="quick-stats">
+      <p>Total verifications today: <strong id="totalToday">0</strong></p>
+      <p>Extension active since: <strong id="activeSince">--</strong></p>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

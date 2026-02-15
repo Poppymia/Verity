@@ -1,0 +1,392 @@
+/* Verity Extension Styles */
+
+/* Highlighted claims */
+.verity-highlight {
+  padding: 2px 4px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.verity-highlight:hover {
+  filter: brightness(0.9);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.verity-highlight-verified {
+  background-color: rgba(0, 200, 83, 0.15);
+  border-bottom: 2px solid #00C853;
+  color: #00C853;
+}
+
+.verity-highlight-questionable {
+  background-color: rgba(255, 179, 0, 0.15);
+  border-bottom: 2px solid #FFB300;
+  color: #D68400;
+}
+
+.verity-highlight-false {
+  background-color: rgba(255, 61, 0, 0.15);
+  border-bottom: 2px solid #FF3D00;
+  color: #FF3D00;
+}
+
+/* Tooltip */
+.verity-tooltip {
+  position: absolute;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  z-index: 999999;
+  min-width: 350px;
+  max-width: 500px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  animation: tooltipFadeIn 0.2s ease-out;
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.verity-tooltip-header {
+  padding: 1rem 1.5rem;
+  border-radius: 12px 12px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: white;
+  font-weight: 600;
+}
+
+.verity-tooltip-header.verified {
+  background: linear-gradient(135deg, #00C853, #00E676);
+}
+
+.verity-tooltip-header.questionable {
+  background: linear-gradient(135deg, #FFB300, #FFC107);
+}
+
+.verity-tooltip-header.false {
+  background: linear-gradient(135deg, #FF3D00, #FF5722);
+}
+
+.verity-tooltip-icon {
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+.verity-tooltip-title {
+  flex: 1;
+  font-size: 1rem;
+}
+
+.verity-tooltip-close {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  line-height: 1;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+
+.verity-tooltip-close:hover {
+  opacity: 1;
+}
+
+.verity-tooltip-body {
+  padding: 1.5rem;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #333;
+}
+
+.verity-tooltip-body strong {
+  color: #1a1a1a;
+  font-weight: 600;
+}
+
+.verity-tooltip-body p {
+  margin: 0.75rem 0;
+}
+
+.verity-tooltip-sources {
+  margin-top: 1rem;
+}
+
+.verity-tooltip-sources ul {
+  margin: 0.5rem 0 0 0;
+  padding-left: 1.5rem;
+}
+
+.verity-tooltip-sources li {
+  margin: 0.25rem 0;
+}
+
+.verity-tooltip-sources a {
+  color: #0066FF;
+  text-decoration: none;
+}
+
+.verity-tooltip-sources a:hover {
+  text-decoration: underline;
+}
+
+.verity-tooltip-explanation {
+  background: #f5f5f5;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+.verity-tooltip-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #eeeeee;
+  text-align: right;
+}
+
+.verity-learn-more {
+  color: #0066FF;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.verity-learn-more:hover {
+  text-decoration: underline;
+}
+
+/* Notification */
+.verity-notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: linear-gradient(135deg, #0066FF, #00C853);
+  color: white;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 102, 255, 0.3);
+  z-index: 999998;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-weight: 600;
+  opacity: 0;
+  transform: translateX(400px);
+  transition: all 0.3s ease-out;
+}
+
+.verity-notification.show {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Modal */
+.verity-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999997;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.verity-modal.show {
+  opacity: 1;
+}
+
+.verity-modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+}
+
+.verity-modal-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border-radius: 16px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.verity-modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+  color: #666;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.verity-modal-close:hover {
+  color: #333;
+}
+
+.verity-modal-title {
+  padding: 2rem 2rem 1rem;
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.verity-modal-body {
+  padding: 0 2rem 2rem;
+}
+
+.verity-rating-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+}
+
+.verity-rating-badge.verified {
+  background: rgba(0, 200, 83, 0.1);
+  color: #00C853;
+  border: 2px solid #00C853;
+}
+
+.verity-rating-badge.questionable {
+  background: rgba(255, 179, 0, 0.1);
+  color: #FFB300;
+  border: 2px solid #FFB300;
+}
+
+.verity-rating-badge.false {
+  background: rgba(255, 61, 0, 0.1);
+  color: #FF3D00;
+  border: 2px solid #FF3D00;
+}
+
+.verity-rating-badge .icon {
+  font-size: 1.5rem;
+}
+
+.verity-claim-text,
+.verity-explanation,
+.verity-sources {
+  margin: 1.5rem 0;
+}
+
+.verity-claim-text strong,
+.verity-explanation strong,
+.verity-sources strong {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #1a1a1a;
+  font-weight: 600;
+}
+
+.verity-claim-text p,
+.verity-explanation p {
+  margin: 0;
+  line-height: 1.6;
+  color: #333;
+}
+
+.verity-explanation {
+  background: #f5f5f5;
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.verity-sources ul {
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.verity-sources li {
+  margin: 0.5rem 0;
+}
+
+.verity-sources a {
+  color: #0066FF;
+  text-decoration: none;
+}
+
+.verity-sources a:hover {
+  text-decoration: underline;
+}
+
+/* Trust Score Badge */
+.verity-trust-badge {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  padding: 1rem 1.5rem;
+  z-index: 999996;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  text-align: center;
+}
+
+.trust-score-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #666;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.trust-score-value {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.trust-score-value.high {
+  color: #00C853;
+}
+
+.trust-score-value.medium {
+  color: #FFB300;
+}
+
+.trust-score-value.low {
+  color: #FF3D00;
+}
+
+.trust-score-info {
+  font-size: 0.75rem;
+  color: #999;
+}
