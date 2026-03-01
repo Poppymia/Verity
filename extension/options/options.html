@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verity Settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="settings-container">
+    <header class="settings-header">
+      <div class="header-content">
+        <div class="logo">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+          <h1>Verity Settings</h1>
+        </div>
+        <p class="subtitle">Configure how Verity detects and verifies claims</p>
+      </div>
+    </header>
+
+    <main class="settings-content">
+      <!-- General Settings -->
+      <section class="settings-section">
+        <h2>General</h2>
+        
+        <div class="setting-item">
+          <div class="setting-info">
+            <label for="autoVerify">Automatic Verification</label>
+            <p>Automatically scan and verify claims when you visit a page</p>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="autoVerify">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <label for="verificationDelay">Verification Delay</label>
+            <p>How long to wait before scanning (in milliseconds)</p>
+          </div>
+          <input type="number" id="verificationDelay" min="0" max="10000" step="500" value="2000">
+        </div>
+      </section>
+
+      <!-- Detection Settings -->
+      <section class="settings-section">
+        <h2>Detection Features</h2>
+        
+        <div class="setting-item">
+          <div class="setting-info">
+            <label for="darkPatternDetection">Dark Pattern Detection</label>
+            <p>Detect fake countdown timers, artificial scarcity, and hidden subscriptions</p>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="darkPatternDetection">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <label for="domainTrustScore">Domain Trust Score</label>
+            <p>Show trust scores for websites based on historical accuracy</p>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="domainTrustScore">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <label for="ecommerceCheck">E-commerce Spec Check</label>
+            <p>Verify product specifications against manufacturer data</p>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="ecommerceCheck">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </section>
+
+      <!-- API Settings -->
+      <section class="settings-section">
+        <h2>API Configuration</h2>
+        
+        <div class="setting-item">
+          <div class="setting-info">
+            <label for="apiEndpoint">API Endpoint</label>
+            <p>URL of your Verity backend server</p>
+          </div>
+          <input type="text" id="apiEndpoint" placeholder="http://localhost:5000">
+        </div>
+
+        <div class="setting-item">
+          <button class="btn-secondary" id="testConnection">Test Connection</button>
+          <span class="connection-status" id="connectionStatus"></span>
+        </div>
+      </section>
+
+      <!-- Display Settings -->
+      <section class="settings-section">
+        <h2>Display</h2>
+        
+        <div class="setting-item">
+          <div class="setting-info">
+            <label for="highlightStyle">Highlight Style</label>
+            <p>How verified claims are highlighted on the page</p>
+          </div>
+          <select id="highlightStyle">
+            <option value="underline">Underline</option>
+            <option value="background">Background Color</option>
+            <option value="border">Border</option>
+          </select>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <label for="showNotifications">Show Notifications</label>
+            <p>Display notifications when verification is complete</p>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="showNotifications">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </section>
+
+      <!-- Data & Privacy -->
+      <section class="settings-section">
+        <h2>Data & Privacy</h2>
+        
+        <div class="setting-item">
+          <div class="setting-info">
+            <label for="collectStats">Collect Anonymous Statistics</label>
+            <p>Help improve Verity by sharing anonymous usage data</p>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="collectStats">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-item">
+          <button class="btn-danger" id="clearCache">Clear Cache</button>
+          <p class="setting-desc">Remove all cached verification results</p>
+        </div>
+
+        <div class="setting-item">
+          <button class="btn-danger" id="resetSettings">Reset to Defaults</button>
+          <p class="setting-desc">Restore all settings to their default values</p>
+        </div>
+      </section>
+
+      <!-- Save Button -->
+      <div class="settings-footer">
+        <button class="btn-primary" id="saveSettings">Save Settings</button>
+        <span class="save-status" id="saveStatus"></span>
+      </div>
+    </main>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>
