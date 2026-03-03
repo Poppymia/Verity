@@ -1,0 +1,84 @@
+.btn {
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 10px;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Primary Button */
+.btn-primary {
+  background: var(--primary);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.95rem;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 102, 255, 0.3);
+}
+
+/* Secondary Button */
+.btn-secondary {
+  background: white;
+  border: 1.5px solid var(--gray-300);
+  padding: 0.75rem 1.5rem;
+  font-size: 0.95rem;
+  color: var(--secondary);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  border-color: var(--gray-600);
+  background: var(--gray-50);
+}
+
+/* Large Buttons */
+.btn-large {
+  padding: 1.25rem 2.5rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  border-radius: 12px;
+}
+
+.btn-primary.btn-large:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 102, 255, 0.3);
+}
+
+.btn-secondary.btn-large {
+  border: 2px solid var(--gray-300);
+}
+
+.btn-secondary.btn-large:hover:not(:disabled) {
+  border-color: var(--secondary);
+}
+
+/* Free tag */
+.free-tag {
+  font-size: 0.75rem;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+/* White variant */
+.btn-white {
+  background: white;
+  color: var(--primary);
+}
+
+.btn-white:hover:not(:disabled) {
+  background: var(--gray-50);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
