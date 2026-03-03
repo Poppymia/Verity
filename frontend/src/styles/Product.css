@@ -1,0 +1,135 @@
+.product-hero {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 4rem 2rem 3rem;
+  text-align: center;
+}
+
+.page-title {
+  font-size: 3.5rem;
+  font-weight: 800;
+  margin-bottom: 1.5rem;
+  letter-spacing: -2px;
+}
+
+.page-subtitle {
+  font-size: 1.35rem;
+  line-height: 1.6;
+  color: var(--gray-600);
+  font-family: 'Newsreader', Georgia, serif;
+}
+
+.product-features {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 3rem 2rem 6rem;
+}
+
+.product-category {
+  margin-bottom: 5rem;
+}
+
+.category-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+.category-icon {
+  width: 40px;
+  height: 40px;
+  color: var(--primary);
+}
+
+.category-header h2 {
+  font-size: 2.25rem;
+  font-weight: 800;
+  letter-spacing: -1px;
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+}
+
+.product-item {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  border: 1.5px solid var(--gray-200);
+  transition: all 0.3s;
+}
+
+.product-item:hover {
+  border-color: var(--primary);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.product-item h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.product-item > p {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: var(--gray-600);
+  margin-bottom: 1.5rem;
+  font-family: 'Newsreader', Georgia, serif;
+}
+
+.product-item ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.product-item li {
+  font-size: 0.95rem;
+  color: var(--gray-800);
+  padding-left: 1.5rem;
+  position: relative;
+}
+
+.product-item li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: var(--success);
+  font-weight: 700;
+}
+
+.product-cta {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 4rem 2rem 6rem;
+}
+
+.cta-box {
+  background: linear-gradient(135deg, var(--primary), #00C853);
+  padding: 4rem;
+  border-radius: 20px;
+  text-align: center;
+}
+
+.cta-box h2 {
+  color: white;
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 2rem;
+  letter-spacing: -1px;
+}
+
+@media (max-width: 968px) {
+  .product-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .page-title {
+    font-size: 2.5rem;
+  }
+}

@@ -1,0 +1,111 @@
+.resources-hero {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 4rem 2rem 3rem;
+  text-align: center;
+}
+
+.resources-content {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem 2rem 6rem;
+}
+
+.resources-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 4rem;
+  margin-bottom: 6rem;
+}
+
+.resource-category h2 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 2rem;
+  letter-spacing: -0.5px;
+}
+
+.resource-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.resource-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  border: 1.5px solid var(--gray-200);
+  transition: all 0.3s;
+}
+
+.resource-card:hover {
+  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.resource-tag {
+  display: inline-block;
+  padding: 0.4rem 0.75rem;
+  background: var(--primary);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+}
+
+.resource-card h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+}
+
+.resource-card p {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--gray-600);
+  margin-bottom: 1rem;
+  font-family: 'Newsreader', Georgia, serif;
+}
+
+.resource-link {
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.resource-link:hover {
+  color: var(--primary-dark);
+  text-decoration: underline;
+}
+
+.help-section {
+  background: var(--gray-50);
+  padding: 4rem;
+  border-radius: 16px;
+  text-align: center;
+}
+
+.help-section h2 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+}
+
+.help-section p {
+  font-size: 1.1rem;
+  color: var(--gray-600);
+  margin-bottom: 2rem;
+  font-family: 'Newsreader', Georgia, serif;
+}
+
+@media (max-width: 968px) {
+  .resource-list {
+    grid-template-columns: 1fr;
+  }
+}
