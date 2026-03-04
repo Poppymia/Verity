@@ -1,26 +1,29 @@
-import React from 'react';
-import { Eye, ShoppingCart, Globe } from 'lucide-react';
+import React from "react";
+import { Eye, ShoppingCart, Globe } from "lucide-react";
 
 const Features = () => {
   const features = [
     {
       icon: <Eye />,
-      iconClass: 'shield',
-      title: 'Real-Time Detection',
-      description: 'Automatically highlights misleading claims as you browse, with color-coded trust indicators.'
+      iconClass: "shield",
+      title: "Real-Time Detection",
+      description:
+        "Automatically highlights misleading claims as you browse, with color-coded trust indicators.",
     },
     {
       icon: <ShoppingCart />,
-      iconClass: 'commerce',
-      title: 'Dark Pattern Alerts',
-      description: 'Detects fake urgency, hidden subscriptions, and deceptive e-commerce tactics instantly.'
+      iconClass: "commerce",
+      title: "Dark Pattern Alerts",
+      description:
+        "Detects fake urgency, hidden subscriptions, and deceptive e-commerce tactics instantly.",
     },
     {
       icon: <Globe />,
-      iconClass: 'domain',
-      title: 'Domain Trust Scores',
-      description: 'View the credibility history and accuracy rating of any website before you trust it.'
-    }
+      iconClass: "domain",
+      title: "Domain Trust Scores",
+      description:
+        "View the credibility history and accuracy rating of any website before you trust it.",
+    },
   ];
 
   return (

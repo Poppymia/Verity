@@ -1,23 +1,23 @@
-import React, { useState } from 'react';
-import Navigation from './components/Navigation';
-import Home from './pages/Home';
-import Product from './pages/Product';
-import Resources from './pages/Resources';
-import HowItWorksPage from './pages/HowItWorksPage';
-import './styles/global.css';
+import React, { useState } from "react";
+import Navigation from "./components/Navigation";
+import Home from "./pages/Home";
+import Product from "./pages/Product";
+import Resources from "./pages/Resources";
+import HowItWorksPage from "./pages/HowItWorksPage";
+import "./styles/global.css";
 
 function App() {
-  const [currentPage, setCurrentPage] = useState('home');
+  const [currentPage, setCurrentPage] = useState("home");
 
   const renderPage = () => {
     switch (currentPage) {
-      case 'home':
+      case "home":
         return <Home onNavigate={setCurrentPage} />;
-      case 'product':
+      case "product":
         return <Product />;
-      case 'resources':
+      case "resources":
         return <Resources />;
-      case 'how-it-works':
+      case "how-it-works":
         return <HowItWorksPage />;
       default:
         return <Home onNavigate={setCurrentPage} />;
