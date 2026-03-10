@@ -1,27 +1,43 @@
 // API Configuration for Verity
 // Google Fact Check Tools API Integration
 
-const API_CONFIG = {
-  // Google Fact Check Tools API
-  factCheck: {
-    enabled: true,
-    apiKey: 'AIzaSyDpczXrIz1AyudAQN5u5xOdjzlda8M5vcc',
-    endpoint: 'https://factchecktools.googleapis.com/v1alpha1/claims:search',
-    maxResults: 5
-  }
-};
+const FACT_CHECK_ENDPOINT = 'https://factchecktools.googleapis.com/v1alpha1/claims:search';
+const FACT_CHECK_MAX_RESULTS = 5;
+
+/**
+ * Load the Fact Check API key from extension settings (stored only in the browser).
+ */
+function getFactCheckApiKey() {
+  return new Promise((resolve) => {
+    if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.sync) {
+      resolve('');
+      return;
+    }
+
+    chrome.storage.sync.get(
+      {
+        factCheckApiKey: ''
+      },
+      (items) => {
+        resolve(items.factCheckApiKey || '');
+      }
+    );
+  });
+}
 
 /**
  * Search for fact-checked claims using Google Fact Check API
  */
 async function searchFactChecks(query) {
-  if (!API_CONFIG.factCheck.enabled || !API_CONFIG.factCheck.apiKey) {
-    console.log('❌ Fact Check API not configured');
+  const apiKey = await getFactCheckApiKey();
+
+  if (!apiKey) {
+    console.log('❌ Fact Check API key not configured. Set it in Verity Settings.');
     return null;
   }
   
   try {
-    const url = `${API_CONFIG.factCheck.endpoint}?query=${encodeURIComponent(query)}&key=${API_CONFIG.factCheck.apiKey}&languageCode=en`;
+    const url = `${FACT_CHECK_ENDPOINT}?query=${encodeURIComponent(query)}&key=${apiKey}&languageCode=en&maxResults=${FACT_CHECK_MAX_RESULTS}`;
     
     console.log('🔍 Searching fact checks for:', query);
     
@@ -121,4 +137,4 @@ async function verifyClaim(claimText) {
   };
 }
 
-console.log('✅ Verity API Config loaded - Fact Check API enabled');
+console.log('✅ Verity API Config loaded - Fact Check API (key stored in settings)');

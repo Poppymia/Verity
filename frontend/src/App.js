@@ -4,6 +4,7 @@ import Home from './pages/Home';
 import Product from './pages/Product';
 import Resources from './pages/Resources';
 import HowItWorksPage from './pages/HowItWorksPage';
+import History from './pages/History';
 import './styles/global.css';
 
 function App() {
@@ -19,6 +20,8 @@ function App() {
         return <Resources />;
       case 'how-it-works':
         return <HowItWorksPage />;
+      case 'history':
+        return <History />;
       default:
         return <Home onNavigate={setCurrentPage} />;
     }

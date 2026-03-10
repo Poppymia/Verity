@@ -16,7 +16,8 @@ async function loadSettings() {
     apiEndpoint: 'http://localhost:5000',
     highlightStyle: 'underline',
     showNotifications: true,
-    collectStats: false
+    collectStats: false,
+    factCheckApiKey: ''
   }, (items) => {
     // Set form values
     document.getElementById('autoVerify').checked = items.autoVerify;
@@ -28,6 +29,7 @@ async function loadSettings() {
     document.getElementById('highlightStyle').value = items.highlightStyle;
     document.getElementById('showNotifications').checked = items.showNotifications;
     document.getElementById('collectStats').checked = items.collectStats;
+    document.getElementById('factCheckApiKey').value = items.factCheckApiKey || '';
   });
 }
 
@@ -57,7 +59,8 @@ function saveSettings() {
     apiEndpoint: document.getElementById('apiEndpoint').value,
     highlightStyle: document.getElementById('highlightStyle').value,
     showNotifications: document.getElementById('showNotifications').checked,
-    collectStats: document.getElementById('collectStats').checked
+    collectStats: document.getElementById('collectStats').checked,
+    factCheckApiKey: document.getElementById('factCheckApiKey').value.trim()
   };
   
   chrome.storage.sync.set(settings, () => {

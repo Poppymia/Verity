@@ -1,0 +1,250 @@
+.history-hero {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 4rem 2rem 2rem;
+}
+
+.history-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.history-icon {
+  width: 40px;
+  height: 40px;
+  color: var(--primary);
+}
+
+.history-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.75rem;
+  flex-wrap: wrap;
+}
+
+.history-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.history-meta {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.history-pill {
+  padding: 0.55rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--gray-200);
+  background: white;
+  color: var(--gray-800);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.history-pill.ok {
+  border-color: rgba(0, 200, 83, 0.35);
+  background: rgba(0, 200, 83, 0.06);
+}
+
+.history-pill.warn {
+  border-color: rgba(255, 179, 0, 0.45);
+  background: rgba(255, 179, 0, 0.08);
+}
+
+.history-pill.subtle {
+  background: var(--gray-50);
+  color: var(--gray-600);
+  font-weight: 500;
+}
+
+.history-content {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 1rem 2rem 6rem;
+}
+
+.history-empty {
+  border: 1.5px solid var(--gray-200);
+  background: white;
+  border-radius: 16px;
+  padding: 2.5rem;
+  text-align: center;
+}
+
+.history-empty h2 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  margin-bottom: 0.75rem;
+}
+
+.history-empty p {
+  color: var(--gray-600);
+  font-size: 1.05rem;
+  line-height: 1.65;
+  font-family: 'Newsreader', Georgia, serif;
+}
+
+.history-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+.history-card {
+  background: white;
+  border: 1.5px solid var(--gray-200);
+  border-radius: 14px;
+  padding: 1.5rem;
+  transition: all 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.history-card:hover {
+  border-color: var(--primary);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+}
+
+.history-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.history-domain {
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--secondary);
+  word-break: break-word;
+}
+
+.history-score {
+  font-weight: 900;
+  border-radius: 999px;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid var(--gray-200);
+  background: var(--gray-50);
+  white-space: nowrap;
+}
+
+.history-score-max {
+  font-weight: 700;
+  color: var(--gray-600);
+  margin-left: 0.15rem;
+}
+
+.history-score.high {
+  border-color: rgba(0, 200, 83, 0.35);
+  background: rgba(0, 200, 83, 0.08);
+}
+
+.history-score.medium {
+  border-color: rgba(255, 179, 0, 0.5);
+  background: rgba(255, 179, 0, 0.12);
+}
+
+.history-score.low {
+  border-color: rgba(255, 61, 0, 0.45);
+  background: rgba(255, 61, 0, 0.10);
+}
+
+.history-card-mid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.history-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.history-label {
+  color: var(--gray-600);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.history-value {
+  color: var(--gray-900);
+  font-weight: 700;
+  font-size: 0.92rem;
+}
+
+.history-reason {
+  margin-top: 0.25rem;
+  color: var(--gray-600);
+  font-size: 1rem;
+  line-height: 1.55;
+  font-family: 'Newsreader', Georgia, serif;
+}
+
+.history-card-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.history-link {
+  color: var(--primary);
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.history-link:hover {
+  text-decoration: underline;
+}
+
+.history-link.disabled {
+  color: var(--gray-600);
+  font-weight: 600;
+}
+
+.history-badge {
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 0.35rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid var(--gray-200);
+  background: white;
+  color: var(--gray-800);
+  white-space: nowrap;
+}
+
+.history-badge.ok {
+  border-color: rgba(0, 200, 83, 0.35);
+  background: rgba(0, 200, 83, 0.06);
+}
+
+.history-badge.subtle {
+  background: var(--gray-50);
+  color: var(--gray-600);
+}
+
+@media (max-width: 1100px) {
+  .history-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 740px) {
+  .history-grid {
+    grid-template-columns: 1fr;
+  }
+}
+

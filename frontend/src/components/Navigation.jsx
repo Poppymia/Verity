@@ -26,6 +26,12 @@ const Navigation = ({ currentPage, onNavigate }) => {
             Product
           </button>
           <button 
+            onClick={() => onNavigate('history')} 
+            className={`nav-link ${currentPage === 'history' ? 'active' : ''}`}
+          >
+            History
+          </button>
+          <button 
             onClick={() => onNavigate('resources')} 
             className={`nav-link ${currentPage === 'resources' ? 'active' : ''}`}
           >
@@ -34,9 +40,6 @@ const Navigation = ({ currentPage, onNavigate }) => {
         </div>
         
         <div className="nav-actions">
-          <Button variant="secondary">
-            Log in
-          </Button>
           <Button variant="primary">
             Get Verity <span className="free-tag">It's free</span>
           </Button>

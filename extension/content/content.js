@@ -542,6 +542,30 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   return true;
 });
 
+// Bridge: allow the Verity website to request history stored by the extension.
+// This does NOT run any scanning logic; it only returns cached `visitHistory`.
+window.addEventListener('message', (event) => {
+  if (event.source !== window) return;
+  if (event.origin !== window.location.origin) return;
+
+  const data = event.data;
+  if (!data || typeof data !== 'object') return;
+  if (data.type !== 'VERITY_HISTORY_REQUEST' || data.source !== 'verity-frontend') return;
+
+  chrome.storage.local.get(['visitHistory'], (result) => {
+    const history = Array.isArray(result?.visitHistory) ? result.visitHistory : [];
+    window.postMessage(
+      {
+        type: 'VERITY_HISTORY_RESPONSE',
+        source: 'verity-extension',
+        requestId: data.requestId,
+        payload: history
+      },
+      event.origin
+    );
+  });
+});
+
 // Initialize when DOM is ready
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', init);
