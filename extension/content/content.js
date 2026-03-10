@@ -1,247 +1,225 @@
-// Main content script - runs on every page
+// Main content script - Domain Trust Scoring + Auto Claim Verification
 
-let settings = {};
-let pageStats = {
-  claimsDetected: 0,
-  verified: 0,
-  questionable: 0,
-  false: 0
-};
+let currentDomainScore = null;
+let trustBadge = null;
+let verificationModal = null;
+let apiClaimResults = [];
 
-// Initialize extension
+// Initialize when page loads
 async function init() {
-  console.log('Verity: Initializing on', window.location.hostname);
+  console.log('Verity: Initializing Domain Trust Scanner');
   
-  // Load settings
-  settings = await getSettings();
+  // Analyze current domain
+  const url = window.location.href;
+  currentDomainScore = await analyzeDomain(url);
   
-  // Show loading indicator
-  showVerificationStatus('scanning');
+  console.log('Domain Score (base):', currentDomainScore);
   
-  // Check for dark patterns
-  if (settings.darkPatternDetection) {
-    detectDarkPatterns();
-  }
+  // Try to verify claims from page
+  await checkPageClaims();
   
-  // Get domain trust score
-  if (settings.domainTrustScore) {
-    await getDomainTrustScore();
-  }
+  // Show trust badge (with claim results if found)
+  showTrustBadge(currentDomainScore, apiClaimResults);
   
-  // Auto-verify if enabled
-  if (settings.autoVerify) {
-    setTimeout(() => {
-      scanAndVerifyClaims();
-    }, settings.verificationDelay || 2000);
-  }
-}
-
-// Get settings from storage
-async function getSettings() {
-  return new Promise((resolve) => {
-    chrome.storage.sync.get({
-      autoVerify: true,
-      darkPatternDetection: true,
-      domainTrustScore: true,
-      apiEndpoint: 'http://localhost:5000',
-      verificationDelay: 2000
-    }, (items) => {
-      resolve(items);
-    });
-  });
-}
-
-// Scan page for claims
-function scanAndVerifyClaims() {
-  console.log('Verity: Scanning for claims...');
+  // Update extension badge
+  updateExtensionBadge(currentDomainScore);
   
-  // Get all text content
-  const textElements = document.querySelectorAll('p, h1, h2, h3, h4, h5, h6, li, td, span, div');
-  
-  textElements.forEach((element) => {
-    // Skip if already processed
-    if (element.hasAttribute('data-verity-processed')) return;
-    
-    const text = element.textContent.trim();
-    
-    // Skip short text
-    if (text.length < 20) return;
-    
-    // Extract claims using NLP
-    const claims = extractClaims(text);
-    
-    if (claims.length > 0) {
-      claims.forEach((claim) => {
-        verifyClaim(claim, element);
-      });
-    }
-    
-    element.setAttribute('data-verity-processed', 'true');
+  // Store result for popup
+  chrome.storage.local.set({
+    currentDomain: currentDomainScore,
+    claimResults: apiClaimResults
   });
   
-  updateBadge();
-  showVerificationStatus('complete');
+  // Show notification
+  showNotification(currentDomainScore, apiClaimResults);
+  
+  // Save to history
+  saveToHistory(currentDomainScore);
 }
 
-// Verify a single claim
-async function verifyClaim(claim, element) {
-  pageStats.claimsDetected++;
+// Check claims on page automatically
+async function checkPageClaims() {
+  console.log('🔍 Scanning page for claims...');
   
   try {
-    // Call verification API
-    const result = await verifyClaimAPI(claim.text);
+    // Extract potential claims
+    const claims = extractClaimsFromPage();
     
-    // Highlight the claim
-    highlightClaim(claim, result, element);
+    if (claims.length === 0) {
+      console.log('ℹ️ No claims extracted from page');
+      return;
+    }
     
-    // Update stats
-    if (result.rating === 'verified') pageStats.verified++;
-    else if (result.rating === 'questionable') pageStats.questionable++;
-    else if (result.rating === 'false') pageStats.false++;
+    // Check each claim with API (max 3)
+    const claimsToCheck = claims.slice(0, 3);
+    apiClaimResults = [];
     
-    updateBadge();
+    for (const claim of claimsToCheck) {
+      console.log(`🔎 Checking: "${claim.text.substring(0, 60)}..."`);
+      
+      const result = await verifyClaim(claim.text);
+      
+      if (result.verified && result.rating !== 'unknown') {
+        console.log(`✅ Found fact-check: ${result.rating}`);
+        apiClaimResults.push(result);
+        
+        // Stop after finding 1 verified claim (to avoid too many API calls)
+        break;
+      } else {
+        console.log(`ℹ️ No fact-check found for this claim`);
+      }
+    }
+    
+    // Adjust domain score based on claim results
+    if (apiClaimResults.length > 0) {
+      adjustScoreBasedOnClaims();
+    } else {
+      console.log('ℹ️ No verified claims found - using domain score only');
+    }
     
   } catch (error) {
-    console.error('Verity: Verification failed', error);
+    console.error('❌ Claim verification error:', error);
   }
 }
 
-// Highlight claim in the page
-function highlightClaim(claim, result, element) {
-  const text = element.innerHTML;
-  const claimText = claim.text;
+// Adjust domain score based on verified claims
+function adjustScoreBasedOnClaims() {
+  if (apiClaimResults.length === 0) return;
   
-  // Create highlight span
-  const highlightClass = `verity-highlight-${result.rating}`;
-  const highlightId = `verity-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  const firstClaim = apiClaimResults[0];
   
-  // Replace text with highlighted version
-  const highlighted = text.replace(
-    claimText,
-    `<span class="verity-highlight ${highlightClass}" 
-          id="${highlightId}" 
-          data-verity-rating="${result.rating}"
-          data-verity-confidence="${result.confidence}"
-          data-verity-sources="${JSON.stringify(result.sources).replace(/"/g, '&quot;')}"
-          title="Click for details">${claimText}</span>`
-  );
+  console.log('📊 Adjusting score based on claim verification...');
+  console.log('Original score:', currentDomainScore.score);
+  console.log('Claim rating:', firstClaim.rating);
   
-  element.innerHTML = highlighted;
-  
-  // Add click listener for tooltip
-  const highlightElement = document.getElementById(highlightId);
-  if (highlightElement) {
-    highlightElement.addEventListener('click', () => {
-      showVerificationTooltip(highlightElement, result);
-    });
+  // Adjust score based on claim rating
+  if (firstClaim.rating === 'verified') {
+    // Verified claim → slight boost
+    currentDomainScore.score = Math.min(100, currentDomainScore.score + 5);
+    currentDomainScore.reason += ' | Contains verified claims';
+    currentDomainScore.apiVerified = true;
+  } else if (firstClaim.rating === 'false') {
+    // False claim → significant penalty
+    currentDomainScore.score = Math.max(0, currentDomainScore.score - 20);
+    currentDomainScore.reason = 'Contains false/debunked claims';
+    currentDomainScore.color = 'red';
+    currentDomainScore.status = 'untrusted';
+    currentDomainScore.apiVerified = true;
+  } else if (firstClaim.rating === 'questionable') {
+    // Questionable claim → moderate penalty
+    currentDomainScore.score = Math.max(0, currentDomainScore.score - 10);
+    currentDomainScore.reason += ' | Contains questionable claims';
+    currentDomainScore.apiVerified = true;
   }
+  
+  console.log('Adjusted score:', currentDomainScore.score);
 }
 
-// Show verification tooltip
-function showVerificationTooltip(element, result) {
-  // Remove existing tooltip
-  const existing = document.querySelector('.verity-tooltip');
-  if (existing) existing.remove();
+// Show trust badge on page
+function showTrustBadge(scoreData, claimResults = []) {
+  // Remove existing badge
+  if (trustBadge && document.body.contains(trustBadge)) {
+    trustBadge.remove();
+  }
   
-  // Create tooltip
-  const tooltip = document.createElement('div');
-  tooltip.className = 'verity-tooltip';
-  tooltip.innerHTML = `
-    <div class="verity-tooltip-header ${result.rating}">
-      <span class="verity-tooltip-icon">${getRatingIcon(result.rating)}</span>
-      <span class="verity-tooltip-title">${getRatingLabel(result.rating)}</span>
-      <button class="verity-tooltip-close">×</button>
-    </div>
-    <div class="verity-tooltip-body">
-      <p><strong>Claim:</strong> ${result.claim}</p>
-      <p><strong>Confidence:</strong> ${result.confidence}%</p>
-      <div class="verity-tooltip-sources">
-        <strong>Sources:</strong>
-        <ul>
-          ${result.sources.map(s => `<li><a href="${s.url}" target="_blank">${s.name}</a></li>`).join('')}
-        </ul>
+  // Build claim info section
+  let claimInfoHTML = '';
+  if (claimResults.length > 0) {
+    const claim = claimResults[0];
+    const ratingClass = claim.rating === 'verified' ? 'verified' : 
+                       claim.rating === 'false' ? 'false' : 'questionable';
+    const ratingIcon = claim.rating === 'verified' ? '✓' : 
+                      claim.rating === 'false' ? '✕' : '⚠';
+    
+    claimInfoHTML = `
+      <div class="claim-verification">
+        <div class="claim-header ${ratingClass}">
+          <span class="claim-icon">${ratingIcon}</span>
+          <span class="claim-status">${claim.rating.toUpperCase()}</span>
+        </div>
+        <div class="claim-text">"${truncateText(claim.claim, 80)}"</div>
+        <div class="claim-source">— ${claim.sources[0]?.name || 'Fact-checker'}</div>
       </div>
-      ${result.explanation ? `<p class="verity-tooltip-explanation">${result.explanation}</p>` : ''}
+    `;
+  }
+  
+  // Create badge
+  trustBadge = document.createElement('div');
+  trustBadge.className = 'verity-trust-badge';
+  trustBadge.innerHTML = `
+    <div class="trust-badge-header">
+      <div class="trust-badge-logo">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+        <span>Verity</span>
+      </div>
+      <button class="trust-badge-close" id="closeTrustBadge">×</button>
     </div>
-    <div class="verity-tooltip-footer">
-      <a href="#" class="verity-learn-more">Learn More</a>
+    <div class="trust-badge-body">
+      <div class="trust-score-circle ${getScoreColorClass(scoreData.score)}">
+        <span class="score-value">${scoreData.score}</span>
+        <span class="score-max">/100</span>
+      </div>
+      <div class="trust-info">
+        <div class="trust-domain">${scoreData.domain}</div>
+        <div class="trust-status ${scoreData.color}">${getStatusText(scoreData.score)}</div>
+        <div class="trust-category">${scoreData.category}</div>
+      </div>
+    </div>
+    ${claimInfoHTML}
+    <div class="trust-badge-footer">
+      <div class="trust-reason">${scoreData.reason}</div>
+      ${scoreData.hasHttps ? '<div class="trust-feature">🔒 Secure HTTPS</div>' : '<div class="trust-warning">⚠️ Not using HTTPS</div>'}
+      ${scoreData.apiVerified ? '<div class="trust-feature">✓ API Verified</div>' : ''}
+      <div class="trust-tip">💡 Select text + Ctrl+Shift+V to verify claims</div>
     </div>
   `;
   
-  // Position tooltip
-  const rect = element.getBoundingClientRect();
-  tooltip.style.position = 'absolute';
-  tooltip.style.top = `${rect.bottom + window.scrollY + 10}px`;
-  tooltip.style.left = `${rect.left + window.scrollX}px`;
+  document.body.appendChild(trustBadge);
   
-  document.body.appendChild(tooltip);
-  
-  // Close button
-  tooltip.querySelector('.verity-tooltip-close').addEventListener('click', () => {
-    tooltip.remove();
-  });
-  
-  // Close on outside click
+  // Add close handler
   setTimeout(() => {
-    document.addEventListener('click', function closeTooltip(e) {
-      if (!tooltip.contains(e.target) && e.target !== element) {
-        tooltip.remove();
-        document.removeEventListener('click', closeTooltip);
-      }
-    });
+    const closeBtn = document.getElementById('closeTrustBadge');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        trustBadge.classList.add('hidden');
+      });
+    }
   }, 100);
+  
+  // Show badge with animation
+  setTimeout(() => {
+    trustBadge.classList.add('show');
+  }, 500);
+  
+  // Auto-hide after 15 seconds (longer if claims found)
+  setTimeout(() => {
+    if (trustBadge && document.body.contains(trustBadge)) {
+      trustBadge.classList.remove('show');
+    }
+  }, claimResults.length > 0 ? 20000 : 12000);
 }
 
-// Get rating icon
-function getRatingIcon(rating) {
-  const icons = {
-    'verified': '✓',
-    'questionable': '⚠',
-    'false': '✕'
-  };
-  return icons[rating] || '?';
-}
-
-// Get rating label
-function getRatingLabel(rating) {
-  const labels = {
-    'verified': 'Verified',
-    'questionable': 'Questionable',
-    'false': 'False Claim'
-  };
-  return labels[rating] || 'Unknown';
-}
-
-// Update extension badge
-function updateBadge() {
-  const total = pageStats.verified + pageStats.questionable + pageStats.false;
-  let color = '#0066FF';
-  
-  if (pageStats.false > 0) color = '#FF3D00';
-  else if (pageStats.questionable > 0) color = '#FFB300';
-  else if (pageStats.verified > 0) color = '#00C853';
-  
-  chrome.runtime.sendMessage({
-    action: 'updateBadge',
-    count: total,
-    color: color
-  });
-}
-
-// Show verification status
-function showVerificationStatus(status) {
-  let message = '';
-  
-  if (status === 'scanning') {
-    message = 'Verity is scanning this page...';
-  } else if (status === 'complete') {
-    const total = pageStats.verified + pageStats.questionable + pageStats.false;
-    message = `Verity found ${total} claim${total !== 1 ? 's' : ''}`;
-  }
-  
-  // Create status notification
+// Show notification
+function showNotification(scoreData, claimResults = []) {
   const notification = document.createElement('div');
   notification.className = 'verity-notification';
+  
+  let message = '';
+  
+  if (claimResults.length > 0 && claimResults[0].rating === 'false') {
+    message = `⚠️ WARNING: False claim detected on ${scoreData.domain}`;
+  } else if (claimResults.length > 0 && claimResults[0].rating === 'verified') {
+    message = `✓ Verified claim found on ${scoreData.domain}`;
+  } else if (scoreData.score >= 80) {
+    message = `✓ Trusted source - ${scoreData.domain}`;
+  } else if (scoreData.score >= 50) {
+    message = `⚠ Exercise caution - ${scoreData.domain}`;
+  } else {
+    message = `⚠ High risk source - ${scoreData.domain}`;
+  }
+  
   notification.textContent = message;
   document.body.appendChild(notification);
   
@@ -252,129 +230,317 @@ function showVerificationStatus(status) {
   setTimeout(() => {
     notification.classList.remove('show');
     setTimeout(() => notification.remove(), 300);
-  }, 3000);
+  }, 5000);
 }
 
-// Listen for messages from background script
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === 'verifySelection') {
-    const selection = window.getSelection().toString().trim();
-    if (selection) {
-      verifySelectedText(selection);
-    }
+// Update extension badge
+function updateExtensionBadge(scoreData) {
+  let color = '#757575';
+  let text = scoreData.score.toString();
+  
+  if (scoreData.score >= 80) {
+    color = '#00C853';
+  } else if (scoreData.score >= 50) {
+    color = '#FFB300';
+  } else {
+    color = '#FF3D00';
   }
-  return true;
-});
+  
+  chrome.runtime.sendMessage({
+    action: 'updateBadge',
+    text: text,
+    color: color
+  });
+}
+
+// Get score color class
+function getScoreColorClass(score) {
+  if (score >= 80) return 'trust-high';
+  if (score >= 50) return 'trust-medium';
+  return 'trust-low';
+}
+
+// Get status text
+function getStatusText(score) {
+  if (score >= 80) return 'Highly Trusted';
+  if (score >= 65) return 'Generally Trusted';
+  if (score >= 50) return 'Use Caution';
+  if (score >= 30) return 'Low Trust';
+  return 'High Risk';
+}
+
+// Truncate text
+function truncateText(text, maxLength) {
+  if (text.length <= maxLength) return text;
+  return text.substring(0, maxLength) + '...';
+}
+
+// ============================================
+// MANUAL CLAIM VERIFICATION (Ctrl+Shift+V)
+// ============================================
 
 // Verify selected text
 async function verifySelectedText(text) {
-  showVerificationStatus('verifying');
+  if (!text) {
+    text = window.getSelection().toString().trim();
+  }
+  
+  if (!text) {
+    showQuickNotification('⚠️ Please select some text to verify', 'warning');
+    return;
+  }
+  
+  if (text.length < 10) {
+    showQuickNotification('⚠️ Selected text is too short (minimum 10 characters)', 'warning');
+    return;
+  }
+  
+  if (text.length > 500) {
+    text = text.substring(0, 500);
+    showQuickNotification('ℹ️ Text truncated to 500 characters', 'info');
+  }
+  
+  // Show loading modal
+  showVerificationModal({ loading: true, claim: text });
+  
+  console.log('🔍 Verifying claim:', text);
   
   try {
-    const result = await verifyClaimAPI(text);
-    
-    // Show result in modal
-    showVerificationModal(text, result);
-    
+    const result = await verifyClaim(text);
+    console.log('📊 Verification Result:', result);
+    showVerificationModal(result);
   } catch (error) {
-    console.error('Verity: Manual verification failed', error);
-    showVerificationModal(text, {
+    console.error('❌ Verification failed:', error);
+    showVerificationModal({
+      verified: false,
       rating: 'error',
-      explanation: 'Verification failed. Please try again.'
+      reason: 'Verification failed. Please try again.',
+      claim: text
     });
   }
 }
 
-// Show verification modal
-function showVerificationModal(claim, result) {
-  // Remove existing modal
-  const existing = document.querySelector('.verity-modal');
-  if (existing) existing.remove();
+// Show verification modal with API results
+function showVerificationModal(result) {
+  if (verificationModal && document.body.contains(verificationModal)) {
+    verificationModal.remove();
+  }
   
-  // Create modal
-  const modal = document.createElement('div');
-  modal.className = 'verity-modal';
-  modal.innerHTML = `
-    <div class="verity-modal-overlay"></div>
-    <div class="verity-modal-content">
-      <button class="verity-modal-close">×</button>
-      <h2 class="verity-modal-title">Verification Result</h2>
-      <div class="verity-modal-body">
-        <div class="verity-rating-badge ${result.rating}">
-          <span class="icon">${getRatingIcon(result.rating)}</span>
-          <span class="label">${getRatingLabel(result.rating)}</span>
+  verificationModal = document.createElement('div');
+  verificationModal.className = 'verity-verification-modal';
+  
+  if (result.loading) {
+    verificationModal.innerHTML = `
+      <div class="verification-overlay"></div>
+      <div class="verification-content loading">
+        <div class="verification-header">
+          <h2>Verifying Claim...</h2>
         </div>
-        <div class="verity-claim-text">
-          <strong>Claim:</strong>
-          <p>${claim}</p>
+        <div class="verification-body">
+          <div class="loading-spinner"></div>
+          <p class="loading-text">Searching fact-check database...</p>
+          <div class="claim-preview">"${truncateText(result.claim, 150)}"</div>
         </div>
-        ${result.explanation ? `
-          <div class="verity-explanation">
-            <strong>Explanation:</strong>
-            <p>${result.explanation}</p>
-          </div>
-        ` : ''}
-        ${result.sources && result.sources.length > 0 ? `
-          <div class="verity-sources">
-            <strong>Sources:</strong>
-            <ul>
-              ${result.sources.map(s => `<li><a href="${s.url}" target="_blank">${s.name}</a></li>`).join('')}
-            </ul>
-          </div>
-        ` : ''}
       </div>
-    </div>
-  `;
-  
-  document.body.appendChild(modal);
-  
-  // Show modal
-  setTimeout(() => modal.classList.add('show'), 10);
-  
-  // Close handlers
-  const close = () => {
-    modal.classList.remove('show');
-    setTimeout(() => modal.remove(), 300);
-  };
-  
-  modal.querySelector('.verity-modal-close').addEventListener('click', close);
-  modal.querySelector('.verity-modal-overlay').addEventListener('click', close);
-}
-
-// Get domain trust score
-async function getDomainTrustScore() {
-  const domain = window.location.hostname;
-  
-  try {
-    const trustScore = await getDomainTrustAPI(domain);
+    `;
+  } else {
+    const ratingClass = result.rating || 'unknown';
+    const ratingIcon = getRatingIcon(result.rating);
+    const ratingLabel = getRatingLabel(result.rating);
+    const confidencePercent = result.confidence || 0;
     
-    // Show trust score badge
-    showTrustScoreBadge(trustScore);
+    verificationModal.innerHTML = `
+      <div class="verification-overlay"></div>
+      <div class="verification-content ${ratingClass}">
+        <button class="verification-close" id="closeVerificationModal">×</button>
+        
+        <div class="verification-header">
+          <div class="rating-badge ${ratingClass}">
+            <span class="rating-icon">${ratingIcon}</span>
+            <span class="rating-label">${ratingLabel}</span>
+          </div>
+          ${result.verified ? `
+            <div class="confidence-bar">
+              <div class="confidence-label">Confidence: ${confidencePercent}%</div>
+              <div class="confidence-track">
+                <div class="confidence-fill ${ratingClass}" style="width: ${confidencePercent}%"></div>
+              </div>
+            </div>
+          ` : ''}
+        </div>
+        
+        <div class="verification-body">
+          <div class="claim-section">
+            <h3>Claim Checked:</h3>
+            <p class="claim-text">"${result.claim}"</p>
+            ${result.claimant ? `<p class="claimant">— ${result.claimant}</p>` : ''}
+          </div>
+          
+          ${result.verified ? `
+            <div class="verdict-section">
+              <h3>Verdict:</h3>
+              <p class="verdict-text">${result.reason}</p>
+              ${result.reviewDate ? `<p class="review-date">Reviewed: ${formatDate(result.reviewDate)}</p>` : ''}
+            </div>
+            
+            ${result.sources && result.sources.length > 0 ? `
+              <div class="sources-section">
+                <h3>Fact-Checked By:</h3>
+                ${result.sources.map(source => `
+                  <div class="source-item">
+                    <a href="${source.url}" target="_blank" class="source-link">
+                      <div class="source-icon">🔗</div>
+                      <div class="source-info">
+                        <div class="source-name">${source.name}</div>
+                        <div class="source-title">${truncateText(source.title, 80)}</div>
+                      </div>
+                      <div class="source-arrow">→</div>
+                    </a>
+                  </div>
+                `).join('')}
+              </div>
+            ` : ''}
+          ` : `
+            <div class="no-results-section">
+              <div class="no-results-icon">🔍</div>
+              <h3>No Fact-Checks Found</h3>
+              <p>This claim hasn't been fact-checked by our sources yet.</p>
+              <p class="tip">This doesn't mean it's false - just that it's not in our database.</p>
+            </div>
+          `}
+        </div>
+        
+        <div class="verification-footer">
+          <p class="disclaimer">
+            ${result.verified 
+              ? 'Fact-check powered by Google Fact Check Tools API' 
+              : 'Try verifying a well-known claim or statement'}
+          </p>
+        </div>
+      </div>
+    `;
+  }
+  
+  document.body.appendChild(verificationModal);
+  setTimeout(() => verificationModal.classList.add('show'), 10);
+  
+  if (!result.loading) {
+    const closeBtn = verificationModal.querySelector('#closeVerificationModal');
+    const overlay = verificationModal.querySelector('.verification-overlay');
     
-  } catch (error) {
-    console.error('Verity: Failed to get trust score', error);
+    const closeModal = () => {
+      verificationModal.classList.remove('show');
+      setTimeout(() => verificationModal.remove(), 300);
+    };
+    
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    if (overlay) overlay.addEventListener('click', closeModal);
+    
+    const escHandler = (e) => {
+      if (e.key === 'Escape') {
+        closeModal();
+        document.removeEventListener('keydown', escHandler);
+      }
+    };
+    document.addEventListener('keydown', escHandler);
   }
 }
 
-// Show trust score badge
-function showTrustScoreBadge(trustScore) {
-  const badge = document.createElement('div');
-  badge.className = 'verity-trust-badge';
-  badge.innerHTML = `
-    <div class="trust-score-label">Site Trust Score</div>
-    <div class="trust-score-value ${getTrustScoreClass(trustScore.score)}">${trustScore.score}/100</div>
-    <div class="trust-score-info">Based on ${trustScore.verificationsCount} verifications</div>
-  `;
-  
-  document.body.appendChild(badge);
+// Helper functions for modal
+function getRatingIcon(rating) {
+  const icons = {
+    'verified': '✓',
+    'questionable': '⚠',
+    'false': '✕',
+    'unknown': '?',
+    'error': '⚠'
+  };
+  return icons[rating] || '?';
 }
 
-// Get trust score class
-function getTrustScoreClass(score) {
-  if (score >= 80) return 'high';
-  if (score >= 50) return 'medium';
-  return 'low';
+function getRatingLabel(rating) {
+  const labels = {
+    'verified': 'Verified',
+    'questionable': 'Questionable',
+    'false': 'False',
+    'unknown': 'Not Found',
+    'error': 'Error'
+  };
+  return labels[rating] || 'Unknown';
 }
+
+function formatDate(dateString) {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', { 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  });
+}
+
+function showQuickNotification(message, type = 'info') {
+  const notification = document.createElement('div');
+  notification.className = `verity-quick-notification ${type}`;
+  notification.textContent = message;
+  
+  document.body.appendChild(notification);
+  setTimeout(() => notification.classList.add('show'), 10);
+  
+  setTimeout(() => {
+    notification.classList.remove('show');
+    setTimeout(() => notification.remove(), 300);
+  }, 3000);
+}
+
+// Save to history
+function saveToHistory(scoreData) {
+  chrome.storage.local.get(['visitHistory'], (data) => {
+    let history = data.visitHistory || [];
+    
+    const entry = {
+      domain: scoreData.domain,
+      score: scoreData.score,
+      category: scoreData.category,
+      reason: scoreData.reason,
+      visitedAt: new Date().toISOString(),
+      url: window.location.href,
+      apiVerified: scoreData.apiVerified || false
+    };
+    
+    const recentVisit = history.find(
+      h => h.domain === entry.domain && 
+      (new Date() - new Date(h.visitedAt)) < 3600000
+    );
+    
+    if (!recentVisit) {
+      history.unshift(entry);
+      if (history.length > 100) {
+        history = history.slice(0, 100);
+      }
+      chrome.storage.local.set({ visitHistory: history });
+      console.log('✅ Saved to history:', entry.domain);
+    }
+  });
+}
+
+// Listen for messages
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === 'getDomainScore') {
+    sendResponse({ score: currentDomainScore });
+  }
+  
+  if (request.action === 'rescanDomain') {
+    init();
+    sendResponse({ status: 'rescanning' });
+  }
+  
+  if (request.action === 'verifySelection') {
+    verifySelectedText(request.text);
+    sendResponse({ status: 'verifying' });
+  }
+  
+  return true;
+});
 
 // Initialize when DOM is ready
 if (document.readyState === 'loading') {

@@ -56,87 +56,6 @@ body {
   background: rgba(255, 255, 255, 0.3);
 }
 
-/* Stats Section */
-.stats-section {
-  padding: 1.5rem;
-  border-bottom: 1px solid #eeeeee;
-}
-
-.stats-section h3 {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #666;
-  margin-bottom: 1rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.75rem;
-}
-
-.stat-card {
-  background: #f5f5f5;
-  border-radius: 12px;
-  padding: 1rem;
-  text-align: center;
-  transition: all 0.2s;
-}
-
-.stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.stat-card.verified {
-  background: rgba(0, 200, 83, 0.1);
-  border: 2px solid #00C853;
-}
-
-.stat-card.questionable {
-  background: rgba(255, 179, 0, 0.1);
-  border: 2px solid #FFB300;
-}
-
-.stat-card.false {
-  background: rgba(255, 61, 0, 0.1);
-  border: 2px solid #FF3D00;
-}
-
-.stat-icon {
-  font-size: 1.25rem;
-  font-weight: bold;
-  margin-bottom: 0.5rem;
-}
-
-.stat-card.verified .stat-icon {
-  color: #00C853;
-}
-
-.stat-card.questionable .stat-icon {
-  color: #FFB300;
-}
-
-.stat-card.false .stat-icon {
-  color: #FF3D00;
-}
-
-.stat-value {
-  font-size: 1.75rem;
-  font-weight: 700;
-  display: block;
-  margin-bottom: 0.25rem;
-  color: #1a1a1a;
-}
-
-.stat-label {
-  font-size: 0.75rem;
-  color: #666;
-  font-weight: 500;
-}
-
 /* Domain Section */
 .domain-section {
   padding: 1.5rem;
@@ -156,6 +75,7 @@ body {
   display: flex;
   align-items: center;
   gap: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .trust-score-circle {
@@ -201,16 +121,37 @@ body {
   flex: 1;
 }
 
-.trust-score-info p:first-child {
-  font-weight: 600;
+.domain-name {
+  font-weight: 700;
   color: #1a1a1a;
   margin-bottom: 0.25rem;
-  font-size: 0.95rem;
+  font-size: 1rem;
+  word-break: break-word;
 }
 
 .trust-score-desc {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 600;
+}
+
+.domain-details {
+  background: #f5f5f5;
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.category-text {
   font-size: 0.85rem;
   color: #666;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.reason-text {
+  font-size: 0.85rem;
+  color: #666;
+  line-height: 1.5;
 }
 
 /* Actions Section */
@@ -223,7 +164,7 @@ body {
 
 .action-btn {
   flex: 1;
-  padding: 0.875rem 1.25rem;
+  padding: 0.875rem 1rem;
   border-radius: 10px;
   border: none;
   font-weight: 600;
@@ -259,23 +200,48 @@ body {
   border-color: #666;
 }
 
-/* Quick Stats */
-.quick-stats {
-  padding: 1rem 1.5rem;
+/* Quick Info */
+.quick-info {
+  padding: 1.5rem;
   background: #fafafa;
 }
 
-.quick-stats p {
+.info-text {
   font-size: 0.85rem;
   color: #666;
-  margin-bottom: 0.5rem;
+  line-height: 1.5;
+  margin-bottom: 1rem;
 }
 
-.quick-stats p:last-child {
-  margin-bottom: 0;
+.score-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
-.quick-stats strong {
-  color: #1a1a1a;
-  font-weight: 600;
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legend-dot.high {
+  background: #00C853;
+}
+
+.legend-dot.medium {
+  background: #FFB300;
+}
+
+.legend-dot.low {
+  background: #FF3D00;
 }

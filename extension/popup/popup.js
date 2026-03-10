@@ -1,146 +1,131 @@
-// Popup script
+// Popup script - Domain Trust Display
 
 document.addEventListener('DOMContentLoaded', async () => {
-  await loadStats();
-  await loadTrustScore();
+  await loadDomainScore();
   setupEventListeners();
 });
 
-// Load page statistics
-async function loadStats() {
+// Load current domain score
+async function loadDomainScore() {
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     
-    // Get stats from content script
-    chrome.tabs.sendMessage(tab.id, { action: 'getStats' }, (response) => {
-      if (response) {
-        updateStatsDisplay(response.stats);
+    // Get domain score from storage
+    chrome.storage.local.get(['currentDomain'], (data) => {
+      if (data.currentDomain) {
+        updateScoreDisplay(data.currentDomain);
       } else {
-        // Default stats
-        updateStatsDisplay({ verified: 0, questionable: 0, false: 0 });
+        // Request from content script
+        chrome.tabs.sendMessage(tab.id, { action: 'getDomainScore' }, (response) => {
+          if (response && response.score) {
+            updateScoreDisplay(response.score);
+          } else {
+            showDefaultScore();
+          }
+        });
       }
     });
-  } catch (error) {
-    console.error('Failed to load stats', error);
-  }
-}
-
-// Update stats display
-function updateStatsDisplay(stats) {
-  document.getElementById('verifiedCount').textContent = stats.verified || 0;
-  document.getElementById('questionableCount').textContent = stats.questionable || 0;
-  document.getElementById('falseCount').textContent = stats.false || 0;
-}
-
-// Load domain trust score
-async function loadTrustScore() {
-  try {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    const url = new URL(tab.url);
-    const domain = url.hostname;
     
+    // Set domain name
+    const url = new URL(tab.url);
+    let domain = url.hostname;
+    if (domain.startsWith('www.')) {
+      domain = domain.substring(4);
+    }
     document.getElementById('domainName').textContent = domain;
     
-    // Get trust score from storage or API
-    const settings = await getSettings();
-    const response = await fetch(`${settings.apiEndpoint}/api/domain-trust/${domain}`);
-    
-    if (response.ok) {
-      const data = await response.json();
-      updateTrustScore(data.score);
-    } else {
-      // Mock data for testing
-      const mockScore = Math.floor(Math.random() * 40) + 60;
-      updateTrustScore(mockScore);
-    }
   } catch (error) {
-    console.error('Failed to load trust score', error);
-    updateTrustScore(75); // Default
+    console.error('Failed to load domain score', error);
+    showDefaultScore();
   }
 }
 
-// Update trust score display
-function updateTrustScore(score) {
+// Update score display
+function updateScoreDisplay(scoreData) {
   const scoreValue = document.getElementById('trustScoreValue');
   const scoreCircle = document.getElementById('trustScoreCircle');
   const scoreDesc = document.getElementById('trustScoreDesc');
+  const categoryDisplay = document.getElementById('categoryDisplay');
+  const reasonDisplay = document.getElementById('reasonDisplay');
   
-  scoreValue.textContent = score;
+  // Set score
+  scoreValue.textContent = scoreData.score;
   
-  // Set color based on score
+  // Set color class
   scoreCircle.className = 'trust-score-circle';
-  if (score >= 80) {
+  if (scoreData.score >= 80) {
     scoreCircle.classList.add('high');
-    scoreDesc.textContent = 'Highly trusted source';
-  } else if (score >= 50) {
+    scoreDesc.textContent = 'Highly Trusted';
+  } else if (scoreData.score >= 50) {
     scoreCircle.classList.add('medium');
-    scoreDesc.textContent = 'Moderately trusted';
+    scoreDesc.textContent = 'Use Caution';
   } else {
     scoreCircle.classList.add('low');
-    scoreDesc.textContent = 'Use with caution';
+    scoreDesc.textContent = 'High Risk';
+  }
+  
+  // Set category and reason
+  if (categoryDisplay) {
+    categoryDisplay.textContent = `Category: ${scoreData.category}`;
+  }
+  if (reasonDisplay) {
+    reasonDisplay.textContent = scoreData.reason;
   }
 }
 
-// Get settings from storage
-async function getSettings() {
-  return new Promise((resolve) => {
-    chrome.storage.sync.get({
-      apiEndpoint: 'http://localhost:5000'
-    }, (items) => {
-      resolve(items);
-    });
-  });
+// Show default score
+function showDefaultScore() {
+  const scoreValue = document.getElementById('trustScoreValue');
+  const scoreDesc = document.getElementById('trustScoreDesc');
+  
+  scoreValue.textContent = '--';
+  scoreDesc.textContent = 'Analyzing...';
 }
 
 // Setup event listeners
 function setupEventListeners() {
-  // Scan button
-  document.getElementById('scanBtn').addEventListener('click', async () => {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    chrome.tabs.sendMessage(tab.id, { action: 'scanPage' });
-    
-    // Show scanning message
-    showMessage('Scanning page...', 'info');
-    
-    // Reload stats after 3 seconds
-    setTimeout(loadStats, 3000);
-  });
-  
-  // Report button
-  document.getElementById('reportBtn').addEventListener('click', async () => {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    chrome.tabs.create({
-      url: `https://verity-app.com/report?url=${encodeURIComponent(tab.url)}`
+  // Rescan button
+  const rescanBtn = document.getElementById('rescanBtn');
+  if (rescanBtn) {
+    rescanBtn.addEventListener('click', async () => {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      chrome.tabs.sendMessage(tab.id, { action: 'rescanDomain' });
+      
+      // Show scanning message
+      const scoreDesc = document.getElementById('trustScoreDesc');
+      scoreDesc.textContent = 'Rescanning...';
+      
+      // Reload after 2 seconds
+      setTimeout(loadDomainScore, 2000);
     });
-  });
+  }
   
   // Settings button
-  document.getElementById('settingsBtn').addEventListener('click', () => {
-    chrome.runtime.openOptionsPage();
-  });
+  const settingsBtn = document.getElementById('settingsBtn');
+  if (settingsBtn) {
+    settingsBtn.addEventListener('click', () => {
+      chrome.runtime.openOptionsPage();
+    });
+  }
   
-  // Load total stats
-  loadTotalStats();
-}
-
-// Load total stats
-async function loadTotalStats() {
-  chrome.storage.local.get(['totalToday', 'installDate'], (data) => {
-    document.getElementById('totalToday').textContent = data.totalToday || 0;
-    
-    if (data.installDate) {
-      const installDate = new Date(data.installDate);
-      const now = new Date();
-      const days = Math.floor((now - installDate) / (1000 * 60 * 60 * 24));
-      document.getElementById('activeSince').textContent = `${days} days`;
-    } else {
-      document.getElementById('activeSince').textContent = 'Today';
-    }
-  });
-}
-
-// Show message
-function showMessage(text, type) {
-  // You can implement a toast notification here
-  console.log(`[${type}] ${text}`);
+  // How It Works button - opens frontend page
+  const learnMoreBtn = document.getElementById('learnMoreBtn');
+  if (learnMoreBtn) {
+    learnMoreBtn.addEventListener('click', () => {
+      chrome.tabs.create({
+        url: 'http://localhost:3000'
+      });
+      
+      // After page opens, navigate to how-it-works
+      setTimeout(() => {
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+          if (tabs[0]) {
+            chrome.tabs.update(tabs[0].id, { 
+              url: 'http://localhost:3000' 
+            });
+          }
+        });
+      }, 500);
+    });
+  }
 }

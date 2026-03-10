@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Verity - Truth Verification",
-  "version": "1.0.0",
-  "description": "Detect misinformation, dark patterns, and misleading claims across the web in real-time.",
+  "name": "Verity - Domain Trust & Fact Checker",
+  "version": "1.2.0",
+  "description": "Automatic domain scoring and claim verification powered by AI.",
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
@@ -11,7 +11,8 @@
   "permissions": [
     "storage",
     "activeTab",
-    "scripting"
+    "scripting",
+    "contextMenus"
   ],
   "host_permissions": [
     "<all_urls>"
@@ -23,10 +24,9 @@
     {
       "matches": ["<all_urls>"],
       "js": [
-        "utils/nlp.js",
-        "utils/api.js",
-        "utils/darkPatterns.js",
-        "content/verification.js",
+        "utils/apiConfig.js",
+        "utils/domainScoring.js",
+        "utils/claimExtractor.js",
         "content/content.js"
       ],
       "css": ["content/content.css"],
@@ -48,7 +48,7 @@
         "default": "Ctrl+Shift+V",
         "mac": "Command+Shift+V"
       },
-      "description": "Verify selected text"
+      "description": "Verify selected text with Verity"
     }
   }
 }

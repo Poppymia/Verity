@@ -23,27 +23,6 @@
       </button>
     </div>
 
-    <div class="stats-section">
-      <h3>Current Page</h3>
-      <div class="stats-grid">
-        <div class="stat-card verified">
-          <div class="stat-icon">✓</div>
-          <div class="stat-value" id="verifiedCount">0</div>
-          <div class="stat-label">Verified</div>
-        </div>
-        <div class="stat-card questionable">
-          <div class="stat-icon">⚠</div>
-          <div class="stat-value" id="questionableCount">0</div>
-          <div class="stat-label">Questionable</div>
-        </div>
-        <div class="stat-card false">
-          <div class="stat-icon">✕</div>
-          <div class="stat-value" id="falseCount">0</div>
-          <div class="stat-label">False</div>
-        </div>
-      </div>
-    </div>
-
     <div class="domain-section">
       <h3>Domain Trust Score</h3>
       <div class="trust-score-display">
@@ -52,32 +31,54 @@
           <span class="trust-score-max">/100</span>
         </div>
         <div class="trust-score-info">
-          <p id="domainName">--</p>
-          <p class="trust-score-desc" id="trustScoreDesc">Calculating...</p>
+          <p id="domainName" class="domain-name">--</p>
+          <p class="trust-score-desc" id="trustScoreDesc">Analyzing...</p>
         </div>
+      </div>
+      
+      <div class="domain-details">
+        <p id="categoryDisplay" class="category-text">Category: --</p>
+        <p id="reasonDisplay" class="reason-text">--</p>
       </div>
     </div>
 
     <div class="actions-section">
-      <button class="action-btn primary" id="scanBtn">
+      <button class="action-btn primary" id="rescanBtn">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="8"/>
-          <path d="m21 21-4.35-4.35"/>
+          <polyline points="23 4 23 10 17 10"/>
+          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
         </svg>
-        Scan Page
+        Rescan Domain
       </button>
-      <button class="action-btn secondary" id="reportBtn">
+      <button class="action-btn secondary" id="learnMoreBtn">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-          <polyline points="14 2 14 8 20 8"/>
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+          <line x1="12" y1="17" x2="12.01" y2="17"/>
         </svg>
-        View Report
+        How It Works
       </button>
     </div>
 
-    <div class="quick-stats">
-      <p>Total verifications today: <strong id="totalToday">0</strong></p>
-      <p>Extension active since: <strong id="activeSince">--</strong></p>
+    <div class="quick-info">
+      <p class="info-text">
+        <strong>Trust scores</strong> are based on domain reputation, 
+        historical accuracy, and verification sources.
+      </p>
+      <div class="score-legend">
+        <div class="legend-item">
+          <span class="legend-dot high"></span>
+          <span>80-100: Highly Trusted</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-dot medium"></span>
+          <span>50-79: Use Caution</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-dot low"></span>
+          <span>0-49: High Risk</span>
+        </div>
+      </div>
     </div>
   </div>
 
