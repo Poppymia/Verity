@@ -17,7 +17,8 @@ async function loadSettings() {
     highlightStyle: 'underline',
     showNotifications: true,
     collectStats: false,
-    factCheckApiKey: ''
+    factCheckApiKey: '',
+    claudeApiKey: ''
   }, (items) => {
     // Set form values
     document.getElementById('autoVerify').checked = items.autoVerify;
@@ -30,6 +31,10 @@ async function loadSettings() {
     document.getElementById('showNotifications').checked = items.showNotifications;
     document.getElementById('collectStats').checked = items.collectStats;
     document.getElementById('factCheckApiKey').value = items.factCheckApiKey || '';
+    const claudeInput = document.getElementById('claudeApiKey');
+    if (claudeInput) {
+      claudeInput.value = items.claudeApiKey || '';
+    }
   });
 }
 
@@ -60,7 +65,8 @@ function saveSettings() {
     highlightStyle: document.getElementById('highlightStyle').value,
     showNotifications: document.getElementById('showNotifications').checked,
     collectStats: document.getElementById('collectStats').checked,
-    factCheckApiKey: document.getElementById('factCheckApiKey').value.trim()
+    factCheckApiKey: document.getElementById('factCheckApiKey').value.trim(),
+    claudeApiKey: (document.getElementById('claudeApiKey')?.value || '').trim()
   };
   
   chrome.storage.sync.set(settings, () => {

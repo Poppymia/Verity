@@ -43,6 +43,14 @@ const TRUSTED_DOMAINS = {
   'ebay.com': { score: 70, category: 'ecommerce', reason: 'Marketplace - seller reliability varies' },
   'google.com': { score: 85, category: 'tech', reason: 'Major tech company' },
   'microsoft.com': { score: 85, category: 'tech', reason: 'Established tech company' },
+
+  // Major platforms & professional (user-generated content — still verify claims)
+  'linkedin.com': { score: 78, category: 'professional', reason: 'Established professional network; treat posts and ads as user content' },
+  'github.com': { score: 82, category: 'tech', reason: 'Major developer platform; repo content varies by publisher' },
+  'stackoverflow.com': { score: 84, category: 'reference', reason: 'Community Q&A with moderation; check dates and accepted answers' },
+  'reddit.com': { score: 62, category: 'social', reason: 'User-driven discussions — verify claims independently' },
+  'x.com': { score: 65, category: 'social', reason: 'Social posts are user content, not editorial' },
+  'twitter.com': { score: 65, category: 'social', reason: 'Social posts are user content, not editorial' },
 };
 
 const UNTRUSTED_DOMAINS = {

@@ -24,6 +24,7 @@
     {
       "matches": ["<all_urls>"],
       "js": [
+        "utils/claudeJsonParse.js",
         "utils/apiConfig.js",
         "utils/domainScoring.js",
         "utils/claimExtractor.js",

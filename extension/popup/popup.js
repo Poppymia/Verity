@@ -5,35 +5,61 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupEventListeners();
 });
 
-// Load current domain score
-async function loadDomainScore() {
+function hostnameForTab(tab) {
   try {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    
-    // Get domain score from storage
-    chrome.storage.local.get(['currentDomain'], (data) => {
-      if (data.currentDomain) {
-        updateScoreDisplay(data.currentDomain);
-      } else {
-        // Request from content script
-        chrome.tabs.sendMessage(tab.id, { action: 'getDomainScore' }, (response) => {
-          if (response && response.score) {
-            updateScoreDisplay(response.score);
-          } else {
-            showDefaultScore();
-          }
-        });
-      }
-    });
-    
-    // Set domain name
     const url = new URL(tab.url);
     let domain = url.hostname;
     if (domain.startsWith('www.')) {
       domain = domain.substring(4);
     }
-    document.getElementById('domainName').textContent = domain;
-    
+    return domain;
+  } catch {
+    return '';
+  }
+}
+
+// Load current domain score
+async function loadDomainScore() {
+  try {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    const domain = hostnameForTab(tab);
+    document.getElementById('domainName').textContent = domain || '—';
+
+    // Prefer live score from this tab (avoids stale storage from another site)
+    const liveScore = await new Promise((resolve) => {
+      chrome.tabs.sendMessage(tab.id, { action: 'getDomainScore' }, (response) => {
+        if (chrome.runtime.lastError) {
+          resolve(null);
+          return;
+        }
+        resolve(response?.score ?? null);
+      });
+    });
+
+    if (liveScore && typeof liveScore.score === 'number') {
+      if (!domain || !liveScore.domain || liveScore.domain === domain) {
+        updateScoreDisplay(liveScore);
+        return;
+      }
+    }
+
+    chrome.storage.local.get(['currentDomain'], (data) => {
+      const stored = data.currentDomain;
+      if (
+        stored &&
+        typeof stored.score === 'number' &&
+        domain &&
+        stored.domain === domain
+      ) {
+        updateScoreDisplay(stored);
+        return;
+      }
+      if (liveScore && typeof liveScore.score === 'number') {
+        updateScoreDisplay(liveScore);
+        return;
+      }
+      showDefaultScore();
+    });
   } catch (error) {
     console.error('Failed to load domain score', error);
     showDefaultScore();

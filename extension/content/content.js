@@ -14,26 +14,38 @@ async function init() {
   currentDomainScore = await analyzeDomain(url);
   
   console.log('Domain Score (base):', currentDomainScore);
+
+  // Always publish base score first so UI never gets stuck on "Analyzing..."
+  publishCurrentScore(currentDomainScore);
+
+  // AI trust analysis (Claude): override score when available, with timeout safety.
+  const aiTrustResult = await analyzeTrustWithClaudeViaBackground(
+    {
+      url,
+      domain: currentDomainScore.domain,
+      pageText: getPageTextForTrustAnalysis()
+    },
+    15000
+  );
+
+  if (aiTrustResult) {
+    currentDomainScore = {
+      ...currentDomainScore,
+      ...aiTrustResult,
+      domain: currentDomainScore.domain,
+      url
+    };
+    console.log('Domain Score (AI):', currentDomainScore);
+    publishCurrentScore(currentDomainScore);
+  } else {
+    console.log('AI trust analysis unavailable/timeout, using base domain score.');
+  }
   
   // Try to verify claims from page
   await checkPageClaims();
-  
-  // Show trust badge (with claim results if found)
-  showTrustBadge(currentDomainScore, apiClaimResults);
-  
-  // Update extension badge
-  updateExtensionBadge(currentDomainScore);
-  
-  // Store result for popup
-  chrome.storage.local.set({
-    currentDomain: currentDomainScore,
-    claimResults: apiClaimResults
-  });
-  
-  // Show notification
-  showNotification(currentDomainScore, apiClaimResults);
-  
-  // Save to history
+
+  // Re-publish in case claims changed score
+  publishCurrentScore(currentDomainScore);
   saveToHistory(currentDomainScore);
 }
 
@@ -275,9 +287,63 @@ function truncateText(text, maxLength) {
   return text.substring(0, maxLength) + '...';
 }
 
-// ============================================
-// MANUAL CLAIM VERIFICATION (Ctrl+Shift+V)
-// ============================================
+// Build a trimmed page excerpt for AI trust analysis
+function getPageTextForTrustAnalysis() {
+  const mainContent = typeof getMainContent === 'function' ? getMainContent() : document.body;
+  const rawText = (mainContent?.innerText || document.body?.innerText || '').replace(/\s+/g, ' ').trim();
+
+  // Keep payload small for API cost/latency
+  return rawText.slice(0, 6000);
+}
+
+async function analyzeTrustWithClaudeViaBackground(payload, timeoutMs = 15000) {
+  return new Promise((resolve) => {
+    const timeoutId = setTimeout(() => {
+      console.warn('Claude background analysis timed out');
+      resolve(null);
+    }, timeoutMs);
+
+    chrome.runtime.sendMessage(
+      {
+        action: 'analyzeTrustWithClaude',
+        payload
+      },
+      (response) => {
+        clearTimeout(timeoutId);
+
+        if (chrome.runtime.lastError) {
+          console.warn('Claude background analysis unavailable:', chrome.runtime.lastError.message);
+          resolve(null);
+          return;
+        }
+
+        if (!response || !response.ok) {
+          resolve(null);
+          return;
+        }
+
+        resolve(response.result || null);
+      }
+    );
+  });
+}
+
+function publishCurrentScore(scoreData) {
+  // Show trust badge (with claim results if found)
+  showTrustBadge(scoreData, apiClaimResults);
+
+  // Update extension badge
+  updateExtensionBadge(scoreData);
+
+  // Store result for popup
+  chrome.storage.local.set({
+    currentDomain: scoreData,
+    claimResults: apiClaimResults
+  });
+
+  // Show notification
+  showNotification(scoreData, apiClaimResults);
+}
 
 // Verify selected text
 async function verifySelectedText(text) {

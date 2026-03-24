@@ -98,9 +98,17 @@
         <div class="setting-item">
           <div class="setting-info">
             <label for="factCheckApiKey">Google Fact Check API Key</label>
-            <p>This key is stored only in your browser and is never uploaded to Verity&rsquo;s servers.</p>
+            <p>Primary data source. This key is stored only in your browser and is never uploaded to Verity&rsquo;s servers.</p>
           </div>
-          <input type="password" id="factCheckApiKey" placeholder="Paste your API key here">
+          <input type="password" id="factCheckApiKey" placeholder="Paste your Google API key here">
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <label for="claudeApiKey">Claude API Key (AI Trust Analysis)</label>
+            <p>Required for automatic AI analysis of visited pages and domain trust scoring. Also used as fallback when claim fact-checks are not found. Stored only in your browser.</p>
+          </div>
+          <input type="password" id="claudeApiKey" placeholder="Paste your Claude API key here">
         </div>
 
         <div class="setting-item">
