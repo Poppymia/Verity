@@ -4,12 +4,19 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "node server.js"
+    "start": "node backend/startServer.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:frontend": "npm --prefix frontend test -- --watchAll=false"
   },
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.19.2",
     "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "jsdom": "^29.0.1",
+    "supertest": "^7.2.2",
+    "vitest": "^4.1.1"
   }
 }
-
