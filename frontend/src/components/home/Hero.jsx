@@ -1,6 +1,7 @@
 import React from 'react';
 import { XCircle } from 'lucide-react';
 import Button from '../Button';
+import { EXTENSION_ZIP_HREF } from '../../constants/extensionDownload';
 
 const Hero = ({ onNavigate }) => {
   return (
@@ -16,8 +17,14 @@ const Hero = ({ onNavigate }) => {
           dark patterns, and misleading claims across the web—so you can browse with trust.
         </p>
         <div className="hero-actions">
-          <Button variant="primary" size="large">
-            Install Extension <span className="free-tag">Free</span>
+          <Button
+            variant="primary"
+            size="large"
+            href={EXTENSION_ZIP_HREF}
+            download="verity-extension.zip"
+            title="Unzip the folder, then in Chrome: Extensions → Developer mode → Load unpacked → select the verity-extension folder."
+          >
+            Download extension <span className="free-tag">Free</span>
           </Button>
           <Button variant="secondary" size="large" onClick={onNavigate}>
             See How It Works

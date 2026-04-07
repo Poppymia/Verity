@@ -1,6 +1,7 @@
 import React from 'react';
 import { Shield } from 'lucide-react';
 import Button from './Button';
+import { EXTENSION_ZIP_HREF } from '../constants/extensionDownload';
 import '../styles/Navigation.css';
 
 const Navigation = ({ currentPage, onNavigate }) => {
@@ -40,8 +41,13 @@ const Navigation = ({ currentPage, onNavigate }) => {
         </div>
         
         <div className="nav-actions">
-          <Button variant="primary">
-            Get Verity <span className="free-tag">It's free</span>
+          <Button
+            variant="primary"
+            href={EXTENSION_ZIP_HREF}
+            download="verity-extension.zip"
+            title="Unzip, then Chrome → Extensions → Developer mode → Load unpacked → verity-extension folder."
+          >
+            Download extension <span className="free-tag">It's free</span>
           </Button>
         </div>
       </div>

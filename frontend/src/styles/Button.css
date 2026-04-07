@@ -10,6 +10,17 @@
   border-radius: 10px;
 }
 
+a.btn {
+  text-decoration: none;
+  box-sizing: border-box;
+}
+
+a.btn[aria-disabled='true'] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 .btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;

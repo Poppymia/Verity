@@ -51,13 +51,17 @@ describe('extension: domainScoring', () => {
     const getScoreColorClass = ctx.getScoreColorClass;
     const getStatusText = ctx.getStatusText;
 
+    // Boundary examples: 49/50 and 79/80
     expect(getScoreColorClass(80)).toBe('trust-high');
+    expect(getScoreColorClass(79)).toBe('trust-medium');
     expect(getScoreColorClass(50)).toBe('trust-medium');
     expect(getScoreColorClass(49)).toBe('trust-low');
 
     expect(getStatusText(80)).toBe('Highly Trusted');
+    expect(getStatusText(79)).toBe('Generally Trusted');
     expect(getStatusText(65)).toBe('Generally Trusted');
     expect(getStatusText(50)).toBe('Use Caution');
+    expect(getStatusText(49)).toBe('Low Trust');
     expect(getStatusText(30)).toBe('Low Trust');
     expect(getStatusText(10)).toBe('High Risk');
   });

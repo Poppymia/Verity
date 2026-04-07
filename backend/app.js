@@ -15,7 +15,6 @@ export function createApp({ fetchImpl = fetchDefault, config = {} } = {}) {
   app.use(cors());
   app.use(express.json());
 
-  // IMPORTANT: These environment variables are set by the runner (server.js / CI).
   const GOOGLE_FACT_CHECK_API_KEY =
     config.googleFactCheckApiKey ?? process.env.GOOGLE_FACT_CHECK_API_KEY ?? '';
   const CLAUDE_API_KEY = config.claudeApiKey ?? process.env.CLAUDE_API_KEY ?? '';

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Zap, FileText } from 'lucide-react';
 import Button from '../components/Button';
+import { EXTENSION_ZIP_HREF } from '../constants/extensionDownload';
 import '../styles/Product.css';
 
 const Product = () => {
@@ -123,8 +124,14 @@ const Product = () => {
       <section className="product-cta">
         <div className="cta-box">
           <h2>Experience the full power of Verity</h2>
-          <Button variant="white" size="large">
-            Install Free Extension
+          <Button
+            variant="white"
+            size="large"
+            href={EXTENSION_ZIP_HREF}
+            download="verity-extension.zip"
+            title="Unzip, then Chrome → Extensions → Developer mode → Load unpacked."
+          >
+            Download extension
           </Button>
         </div>
       </section>

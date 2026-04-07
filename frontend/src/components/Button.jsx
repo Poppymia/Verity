@@ -8,6 +8,8 @@ const Button = ({
   onClick, 
   disabled = false,
   className = '',
+  href,
+  download,
   ...props 
 }) => {
   const getButtonClass = () => {
@@ -26,6 +28,21 @@ const Button = ({
     
     return classes.join(' ');
   };
+
+  if (href) {
+    return (
+      <a
+        className={getButtonClass()}
+        href={disabled ? undefined : href}
+        download={download}
+        aria-disabled={disabled || undefined}
+        onClick={disabled ? (e) => e.preventDefault() : onClick}
+        {...props}
+      >
+        {children}
+      </a>
+    );
+  }
 
   return (
     <button 

@@ -13,6 +13,38 @@ function makeResponse({ ok = true, status = 200, jsonData } = {}) {
 }
 
 describe('POST /api/verify-claim', () => {
+  it('returns 400 when claim is missing', async () => {
+    const app = createApp({
+      fetchImpl: async () => {
+        throw new Error('fetch should not be called when claim is invalid');
+      },
+      config: {
+        googleFactCheckApiKey: 'test-google-key',
+        claudeApiKey: 'test-claude-key'
+      }
+    });
+
+    const res = await request(app).post('/api/verify-claim').send({});
+    expect(res.status).toBe(400);
+    expect(res.body).toEqual({ error: 'Missing claim text' });
+  });
+
+  it('returns 400 when claim is not a string', async () => {
+    const app = createApp({
+      fetchImpl: async () => {
+        throw new Error('fetch should not be called when claim is invalid');
+      },
+      config: {
+        googleFactCheckApiKey: 'test-google-key',
+        claudeApiKey: 'test-claude-key'
+      }
+    });
+
+    const res = await request(app).post('/api/verify-claim').send({ claim: 123 });
+    expect(res.status).toBe(400);
+    expect(res.body).toEqual({ error: 'Missing claim text' });
+  });
+
   it('returns unknown when no API keys are configured', async () => {
     const app = createApp({
       fetchImpl: async () => {
@@ -105,6 +137,142 @@ describe('POST /api/verify-claim', () => {
     expect(res.body.rating).toBe('unknown');
     expect(res.body.confidence).toBe(0);
     expect(res.body.sources).toEqual([]);
+  });
+
+  it('clamps Claude confidence to the 0-100 range (lower bound)', async () => {
+    const fetchImpl = async (url) => {
+      if (!String(url).includes('api.anthropic.com')) {
+        throw new Error(`Unexpected URL: ${url}`);
+      }
+
+      return makeResponse({
+        ok: true,
+        jsonData: {
+          content: [
+            {
+              type: 'text',
+              text: '```json\n{ "rating": "verified", "confidence": -10, "explanation": "too low" }\n```'
+            }
+          ]
+        }
+      });
+    };
+
+    const app = createApp({
+      fetchImpl,
+      config: {
+        googleFactCheckApiKey: '',
+        claudeApiKey: 'test-claude-key'
+      }
+    });
+
+    const res = await request(app).post('/api/verify-claim').send({ claim: 'Any claim.' });
+    expect(res.status).toBe(200);
+    expect(res.body.rating).toBe('verified');
+    expect(res.body.color).toBe('green');
+    expect(res.body.confidence).toBe(0);
+  });
+
+  it('clamps Claude confidence to the 0-100 range (upper bound)', async () => {
+    const fetchImpl = async (url) => {
+      if (!String(url).includes('api.anthropic.com')) {
+        throw new Error(`Unexpected URL: ${url}`);
+      }
+
+      return makeResponse({
+        ok: true,
+        jsonData: {
+          content: [
+            {
+              type: 'text',
+              text: '```json\n{ "rating": "false", "confidence": 101, "explanation": "too high" }\n```'
+            }
+          ]
+        }
+      });
+    };
+
+    const app = createApp({
+      fetchImpl,
+      config: {
+        googleFactCheckApiKey: '',
+        claudeApiKey: 'test-claude-key'
+      }
+    });
+
+    const res = await request(app).post('/api/verify-claim').send({ claim: 'Any claim.' });
+    expect(res.status).toBe(200);
+    expect(res.body.rating).toBe('false');
+    expect(res.body.color).toBe('red');
+    expect(res.body.confidence).toBe(100);
+  });
+
+  it('uses default confidence when Claude confidence is not a number', async () => {
+    const fetchImpl = async (url) => {
+      if (!String(url).includes('api.anthropic.com')) {
+        throw new Error(`Unexpected URL: ${url}`);
+      }
+
+      return makeResponse({
+        ok: true,
+        jsonData: {
+          content: [
+            {
+              type: 'text',
+              text: '```json\n{ "rating": "questionable", "confidence": "90", "explanation": "string value" }\n```'
+            }
+          ]
+        }
+      });
+    };
+
+    const app = createApp({
+      fetchImpl,
+      config: {
+        googleFactCheckApiKey: '',
+        claudeApiKey: 'test-claude-key'
+      }
+    });
+
+    const res = await request(app).post('/api/verify-claim').send({ claim: 'Any claim.' });
+    expect(res.status).toBe(200);
+    expect(res.body.rating).toBe('questionable');
+    expect(res.body.color).toBe('yellow');
+    expect(res.body.confidence).toBe(50);
+  });
+
+  it('falls back to "questionable" when Claude rating is invalid', async () => {
+    const fetchImpl = async (url) => {
+      if (!String(url).includes('api.anthropic.com')) {
+        throw new Error(`Unexpected URL: ${url}`);
+      }
+
+      return makeResponse({
+        ok: true,
+        jsonData: {
+          content: [
+            {
+              type: 'text',
+              text: '```json\n{ "rating": "not-a-real-rating", "confidence": 90, "explanation": "bad rating" }\n```'
+            }
+          ]
+        }
+      });
+    };
+
+    const app = createApp({
+      fetchImpl,
+      config: {
+        googleFactCheckApiKey: '',
+        claudeApiKey: 'test-claude-key'
+      }
+    });
+
+    const res = await request(app).post('/api/verify-claim').send({ claim: 'Any claim.' });
+    expect(res.status).toBe(200);
+    expect(res.body.rating).toBe('questionable');
+    expect(res.body.color).toBe('yellow');
+    expect(res.body.confidence).toBe(90);
   });
 
   it('returns verified result from Google Fact Check response', async () => {

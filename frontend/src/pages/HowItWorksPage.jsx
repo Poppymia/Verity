@@ -1,6 +1,7 @@
 import React from 'react';
 import { CheckCircle, AlertTriangle, XCircle, Search, Zap, Shield, Globe, Eye, Code } from 'lucide-react';
 import Button from '../components/Button';
+import { EXTENSION_ZIP_HREF } from '../constants/extensionDownload';
 import '../styles/HowItWorksPage.css';
 
 const HowItWorksPage = () => {
@@ -309,9 +310,15 @@ const HowItWorksPage = () => {
       {/* CTA */}
       <section className="cta-final">
         <h2>Ready to Start Verifying?</h2>
-        <p>Install the Verity extension and browse with confidence</p>
-        <Button variant="primary" size="large">
-          Install Free Extension
+        <p>Download the Verity extension, load it in your browser, and browse with confidence</p>
+        <Button
+          variant="primary"
+          size="large"
+          href={EXTENSION_ZIP_HREF}
+          download="verity-extension.zip"
+          title="Unzip, then Chrome → Extensions → Developer mode → Load unpacked."
+        >
+          Download extension
         </Button>
       </section>
     </div>
